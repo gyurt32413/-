@@ -17,6 +17,7 @@
 
     <!-- 分頁標籤 RestaurantPagination -->
     <RestaurantsPagination
+      v-if="totalPage.length > 1"
       :current-page="currentPage"
       :total-page="totalPage"
       :category-id="categoryId"
@@ -32,279 +33,9 @@ import RestaurantCard from "../components/RestaurantCard.vue";
 import RestaurantsNavPills from "../components/RestaurantsNavPills.vue";
 import RestaurantsPagination from "../components/RestaurantsPagination.vue";
 
-const dummyData = {
-  restaurants: [
-    {
-      id: 1,
-      name: "Dr. Josue Green",
-      tel: "(009) 904-9571",
-      address: "129 Wintheiser Brook",
-      opening_hours: "08:00",
-      description: "Laborum corrupti fugiat possimus consectetur sint ",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=17.276917600096976",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 1,
-      Category: {
-        id: 1,
-        name: "中式料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 2,
-      name: "Rebecca Jacobs",
-      tel: "(122) 972-4577 x654",
-      address: "2539 Myra Brooks",
-      opening_hours: "08:00",
-      description: "Magni dolores numquam recusandae sunt quibusdam ve",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=68.25980593398012",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 3,
-      Category: {
-        id: 3,
-        name: "義大利料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 3,
-      name: "Dr. Lenore Corwin",
-      tel: "944.484.0797 x54635",
-      address: "42491 Leffler Mountain",
-      opening_hours: "08:00",
-      description: "Non quo hic dolor est perferendis maxime rerum vol",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=19.656800678373855",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 1,
-      Category: {
-        id: 1,
-        name: "中式料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 4,
-      name: "Reilly Koepp",
-      tel: "740-320-0312",
-      address: "2022 Schaden Station",
-      opening_hours: "08:00",
-      description: "quia",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=45.53544895128974",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 5,
-      Category: {
-        id: 5,
-        name: "素食料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 5,
-      name: "Eugenia Quigley",
-      tel: "783-181-5252 x072",
-      address: "25185 Edgar Place",
-      opening_hours: "08:00",
-      description: "est ipsam dignissimos",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=2.757961040958934",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 3,
-      Category: {
-        id: 3,
-        name: "義大利料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 6,
-      name: "Miss Lia Brown",
-      tel: "467.741.4944",
-      address: "8454 Gerhold Roads",
-      opening_hours: "08:00",
-      description: "et",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=30.340204341089773",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 2,
-      Category: {
-        id: 2,
-        name: "日本料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 7,
-      name: "Graham Medhurst",
-      tel: "616-598-4425 x7793",
-      address: "243 DuBuque Manors",
-      opening_hours: "08:00",
-      description: "omnis voluptas enim",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=36.607483532968054",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 5,
-      Category: {
-        id: 5,
-        name: "素食料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 8,
-      name: "Lon Douglas II",
-      tel: "1-383-343-1485 x0519",
-      address: "560 Schmitt Underpass",
-      opening_hours: "08:00",
-      description: "Molestiae iste non amet sunt dolores culpa.",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=18.421906429227718",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 3,
-      Category: {
-        id: 3,
-        name: "義大利料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 9,
-      name: "Laurine Mueller",
-      tel: "1-592-631-7024 x338",
-      address: "366 Reinhold Spring",
-      opening_hours: "08:00",
-      description: "Et itaque molestiae laborum aut sed non rerum eum ",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=49.213936588184445",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 5,
-      Category: {
-        id: 5,
-        name: "素食料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-    {
-      id: 10,
-      name: "Albert Mayert",
-      tel: "1-606-117-4329 x38008",
-      address: "100 Veum River",
-      opening_hours: "08:00",
-      description: "Voluptas fuga aut dolorem a.",
-      image:
-        "https://loremflickr.com/320/240/restaurant,food/?random=22.86531604792983",
-      viewCounts: 0,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-      CategoryId: 4,
-      Category: {
-        id: 4,
-        name: "墨西哥料理",
-        createdAt: "2022-04-20T15:00:31.000Z",
-        updatedAt: "2022-04-20T15:00:31.000Z",
-      },
-      isFavorited: false,
-      isLiked: false,
-    },
-  ],
-  categories: [
-    {
-      id: 1,
-      name: "中式料理",
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-    {
-      id: 2,
-      name: "日本料理",
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-    {
-      id: 3,
-      name: "義大利料理",
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-    {
-      id: 4,
-      name: "墨西哥料理",
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-    {
-      id: 5,
-      name: "素食料理",
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-    {
-      id: 6,
-      name: "美式料理",
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-    {
-      id: 7,
-      name: "複合式料理",
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-  ],
-  categoryId: "",
-  page: 1,
-  totalPage: [1, 2, 3, 4, 5],
-  prev: 1,
-  next: 2,
-};
+// STEP 1：透過 import 匯入剛剛撰寫好用來呼叫 API 的方法
+import restaurantsAPI from "../apis/restaurants";
+import { Toast } from "../utils/helpers";
 
 export default {
   name: "Restaurant",
@@ -326,27 +57,60 @@ export default {
     };
   },
   created() {
-    this.fetchRestaurants();
+    // STEP 3：在 created 的時候呼叫 fetchRestaurants 方法
+    // 這裡會向伺服器請求第一頁且不分餐廳類別的資料
+    const { page = '', categoryId = '' } = this.$route.query
+    this.fetchRestaurants({ queryPage: page, queryCategoryId: categoryId });
+  },
+
+  beforeRouteUpdate(to, from, next) {
+    // console.log("to", to);
+    console.log("from", from);
+    const { page = '', categoryId = '' } = to.query;
+    this.fetchRestaurants({ queryPage: page, queryCategoryId: categoryId });
+
+    next();
   },
 
   methods: {
-    fetchRestaurants() {
-      const {
-        restaurants,
-        categories,
-        categoryId,
-        page,
-        totalPage,
-        prev,
-        next,
-      } = dummyData;
-      this.restaurants = restaurants
-      this.categories = categories
-      this.categoryId = categoryId
-      this.currentPage = page
-      this.totalPage = totalPage
-      this.previousPage = prev
-      this.nextPage = next
+    // STEP 2：將 fetchRestaurants 改成 async...await 的語法
+    // 並且可以帶入參數 page 與 categoryId
+    // 呼叫 API 後取得 response
+    async fetchRestaurants({ queryPage, queryCategoryId }) {
+      try {
+        const response = await restaurantsAPI.getRestaurants({
+          page: queryPage,
+          categoryId: queryCategoryId,
+        });
+
+        console.log("response", response);
+
+        // STEP 2：透過解構賦值，將所需要的資料從 response.data 取出
+        const {
+          restaurants,
+          categories,
+          categoryId,
+          page,
+          totalPage,
+          prev,
+          next,
+        } = response.data;
+
+        // STEP 3：將從伺服器取得的 data 帶入 Vue 內
+        this.restaurants = restaurants;
+        this.categories = categories;
+        this.categoryId = categoryId;
+        this.currentPage = page;
+        this.totalPage = totalPage;
+        this.previousPage = prev;
+        this.nextPage = next;
+      } catch (error) {
+        console.log("error", error);
+        Toast.fire({
+          icon: "error",
+          title: "無法取得餐廳資料，請稍後再試",
+        });
+      }
     },
   },
 };

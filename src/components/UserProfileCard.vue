@@ -25,8 +25,10 @@
             </li>
           </ul>
           <p>
-            <a v-if="currentUser.isAdmin" href="/users/2/edit"
-              ><button type="submit" class="btn btn-primary">edit</button></a
+            <router-link :to="{ name: 'user-edit' }" v-if="currentUser.isAdmin">
+              <button type="submit" class="btn btn-primary">
+                edit
+              </button></router-link
             >
             <template v-else>
               <button

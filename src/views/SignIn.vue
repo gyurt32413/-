@@ -35,15 +35,17 @@
         />
       </div>
 
-      <button class="btn btn-lg btn-primary btn-block mb-3" type="submit">
+      <button
+        class="btn btn-lg btn-primary btn-block mb-3"
+        type="submit"
+        :disabled="isProcessing"
+      >
         Submit
       </button>
 
       <div class="text-center mb-3">
         <p>
-          <router-link to="/signup">
-            Sign Up
-          </router-link>
+          <router-link to="/signup"> Sign Up </router-link>
         </p>
       </div>
 
@@ -53,24 +55,60 @@
 </template>
 
 <script>
+// import { response } from 'express';
+import authorizationAPI from "../apis/authorization";
+import { Toast } from "../utils/helpers";
+
 export default {
   data() {
     return {
-      email: '',
-      password: '',
-    }
+      email: "",
+      password: "",
+      isProcessing: false,
+    };
   },
-  
-  methods: {
-    handleSubmit () {
-      const data = JSON.stringify({
-        email: this.email,
-        password: this.password
-      })
 
-      // TODO: 向後端驗證使用者登入資訊是否合法
-      console.log('data', data)
-    }
-  }
-}
+  methods: {
+    async handleSubmit() {
+      try {
+        if (!this.email || !this.password) {
+          Toast.fire({
+            icon: "warning",
+            title: "請填入 email 和 password",
+          });
+          return;
+        }
+
+        this.isProcessing = true;
+
+        // 使用 authorizationAPI 的 signIn 方法
+        // 並且帶入使用者填寫的 email 和 password
+        const response = await authorizationAPI.signIn({
+          email: this.email,
+          password: this.password,
+        });
+
+        const { data } = response;
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        // 將 token 存放在 localStorage 內
+        localStorage.setItem("token", data.token);
+
+        // 成功登入後轉址到餐聽首頁
+        this.$router.push("/restaurants");
+      } catch (error) {
+        this.password = "";
+        this.isProcessing = false;
+
+        Toast.fire({
+          icon: "warning",
+          title: "請確認您輸入了正確的帳號密碼",
+        });
+      }
+    },
+  },
+};
 </script>

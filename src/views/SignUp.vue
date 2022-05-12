@@ -78,6 +78,9 @@
 </template>
 
 <script>
+import authorizationAPI from "../apis/authorization";
+import { Toast } from "../utils/helpers";
+
 export default {
   data() {
     return {
@@ -85,20 +88,56 @@ export default {
       email: "",
       password: "",
       passwordCheck: "",
+      isProcessing: false,
     };
   },
 
   methods: {
-    handleSubmit() {
-      const data = JSON.stringify({
-        name: this.name,
-        email: this.email,
-        password: this.password,
-        passwordCheck: this.passwordCheck,
-      });
+    async handleSubmit() {
+      try {
+        if (!this.email || !this.password) {
+          Toast.fire({
+            icon: "warning",
+            title: "請填入完整資料",
+          });
+          return;
+        }
+        if (this.password !== this.passwordCheck) {
+          Toast.fire({
+            icon: "warning",
+            title: "密碼與密碼確認不相符",
+          });
+          return;
+        }
+        this.isProcessing = true;
 
-      // TODO: 向後端驗證使用者登入資訊是否合法
-      console.log("data", data);
+        const response = await authorizationAPI.signUp({
+          name: this.name,
+          email: this.email,
+          password: this.password,
+          passwordCheck: this.passwordCheck,
+        });
+
+        const { data } = response;
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        Toast.fire({
+          icon: "success",
+          title: "成功註冊",
+        });
+      } catch (error) {
+        this.password = "";
+        this.passwordCheck = "";
+        this.isProcessing = false;
+
+        Toast.fire({
+          icon: "warning",
+          title: "請確認您輸入了正確的帳號密碼",
+        });
+      }
     },
   },
 };
