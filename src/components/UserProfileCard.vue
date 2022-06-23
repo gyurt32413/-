@@ -2,7 +2,7 @@
   <div class="card mb-3">
     <div class="row no-gutters">
       <div class="col-md-4">
-        <img :src="profile.image" width="300px" height="300px" />
+        <img :src="profile.image | emptyImage" width="300px" height="300px" />
       </div>
       <div class="col-md-8">
         <div class="card-body">
@@ -10,22 +10,22 @@
           <p class="card-text">{{ profile.email }}</p>
           <ul class="list-unstyled list-inline">
             <li>
-              <strong>{{ profile.Comments.length }}</strong> 已評論餐廳
+              <strong>{{ profile.commentsLength }}</strong> 已評論餐廳
             </li>
             <li>
-              <strong>{{ profile.FavoritedRestaurants.length }}</strong>
+              <strong>{{ profile.favoritedRestaurantsLength }}</strong>
               收藏的餐廳
             </li>
             <li>
-              <strong>{{ profile.Followings.length }}</strong> followings
+              <strong>{{ profile.followingsLength }}</strong> followings
               (追蹤者)
             </li>
             <li>
-              <strong>{{ profile.Followers.length }}</strong> followers (追隨者)
+              <strong>{{ profile.followersLength }}</strong> followers (追隨者)
             </li>
           </ul>
           <p>
-            <router-link :to="{ name: 'user-edit' }" v-if="currentUser.isAdmin">
+            <router-link :to="{ name: 'user-edit' }" v-if="isCurrentUser">
               <button type="submit" class="btn btn-primary">
                 edit
               </button></router-link
@@ -33,7 +33,7 @@
             <template v-else>
               <button
                 v-if="!isFollowed"
-                @click.prevent.stop="addFollowing()"
+                @click.prevent.stop="addFollowing(profile.id)"
                 type="button"
                 class="btn btn-primary btn-border favorite mr-2"
               >
@@ -41,7 +41,7 @@
               </button>
               <button
                 v-else
-                @click.prevent.stop="deleteFollowing()"
+                @click.prevent.stop="deleteFollowing(profile.id)"
                 type="button"
                 class="btn btn-danger btn-border favorite mr-2"
               >
@@ -56,18 +56,11 @@
 </template>
 
 <script>
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "管理者",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+import { emptyImageFilter } from "../utils/mixins";
+import usersAPI from "../apis/users";
 
 export default {
+  mixins: [emptyImageFilter],
   props: {
     initialProfile: {
       type: Object,
@@ -77,20 +70,55 @@ export default {
       type: Boolean,
       required: true,
     },
+    isCurrentUser: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  created() {
+    console.log(this.initialProfile);
   },
   data() {
     return {
-      currentUser: dummyUser.currentUser,
       profile: this.initialProfile,
       isFollowed: this.initialIsFollowed,
     };
   },
-  methods: {
-    addFollowing() {
-      this.isFollowed = true;
+  watch: {
+    initialProfile(newValue) {
+      this.profile = {
+        ...this.profile,
+        ...newValue,
+      };
     },
-    deleteFollowing() {
-      this.isFollowed = false;
+    initialIsFollowed(newValue) {
+      this.isFollowed = newValue;
+    },
+  },
+  methods: {
+    async addFollowing(userId) {
+      try {
+        const { statusText } = await usersAPI.addFollowing({ userId });
+        if (statusText === "OK") {
+          this.isFollowed = true;
+        } else {
+          throw new Error(statusText);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async deleteFollowing(userId) {
+      try {
+        const { statusText } = await usersAPI.deleteFollowing({ userId });
+        if (statusText === "OK") {
+          this.isFollowed = false;
+        } else {
+          throw new Error(statusText);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
 };

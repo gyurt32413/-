@@ -4,9 +4,19 @@ import NotFound from '../views/NotFound'
 import SignIn from '../views/SignIn'
 import SignUp from '../views/SignUp'
 import Restaurants from '../views/Restaurants'
+import store from './../store'
 
 
 Vue.use(VueRouter)
+
+const authorizeIsAdmin = (to, from, next) => {
+  const currentUser = store.state.currentUser
+  if (currentUser && !currentUser.isAdmin) {
+    next('404')
+    return
+  }
+  next()
+}
 
 const routes = [
   {
@@ -68,37 +78,44 @@ const routes = [
     path: '/admin',
     // exact完全匹配時
     exact: true,
-    redirect: '/admin/restaurants'
+    redirect: '/admin/restaurants',
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/categories',
     name: 'admin-categories',
-    component: () => import('../views/AdminCategories.vue')
+    component: () => import('../views/AdminCategories.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/users',
     name: 'admin-users',
-    component: () => import('../views/AdminUsers.vue')
+    component: () => import('../views/AdminUsers.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/restaurants',
     name: 'admin-restaurants',
-    component: () => import('../views/AdminRestaurants.vue')
+    component: () => import('../views/AdminRestaurants.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/restaurants/new',
     name: 'admin-restaurant-new',
-    component: () => import('../views/AdminRestaurantNew.vue')
+    component: () => import('../views/AdminRestaurantNew.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/restaurants/:id',
     name: 'admin-restaurant',
-    component: () => import('../views/AdminRestaurant.vue')
+    component: () => import('../views/AdminRestaurant.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '/admin/restaurants/:id/edit',
     name: 'admin-restaurant-edit',
-    component: () => import('../views/AdminRestaurantEdit.vue')
+    component: () => import('../views/AdminRestaurantEdit.vue'),
+    beforeEnter: authorizeIsAdmin
   },
   {
     path: '*',
@@ -110,6 +127,37 @@ const routes = [
 const router = new VueRouter({
   linkExactActiveClass: 'active',
   routes
+})
+
+router.beforeEach(async (to, from, next) => {
+  // console.log('from', from)
+  // 使用 dispatch 呼叫 Vuex 內的 actions
+  // 從 localStorage 取出 token
+  const tokenInLocalStorage = localStorage.getItem('token')
+  const tokenInStore = store.state.token
+  let isAuthenticated = store.state.isAuthenticated
+
+  // 比較 localStorage 和 store 中的 token 是否一樣
+  if (tokenInLocalStorage && tokenInLocalStorage !== tokenInStore) {
+    isAuthenticated = await store.dispatch('fetchCurrentUser')
+  }
+
+  // 對於不需要驗證 token 的頁面
+  const pathsWithoutAuthentication = ['signUp', 'signIn']
+
+  // 如果 token 無效且進入需要驗證的頁面則轉址到登入頁
+  if (!isAuthenticated && !pathsWithoutAuthentication.includes(to.name)) {
+    next('/signin')
+    return
+  }
+
+  // 如果 token 有效則轉址到餐廳首頁
+  if (isAuthenticated && pathsWithoutAuthentication.includes(to.name)) {
+    next('/restaurants')
+    return
+  }
+
+  next()
 })
 
 export default router

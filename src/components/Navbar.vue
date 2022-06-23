@@ -17,14 +17,23 @@
     <div id="navbarSupportedContent" class="navbar-collapse collapse">
       <div class="ml-auto d-flex align-items-center">
         <!-- is user is admin -->
-        <router-link to="/admin" v-if="currentUser.isAdmin" class="text-white mr-3"> 管理員後台 </router-link>
+        <router-link
+          to="/admin"
+          v-if="currentUser.isAdmin"
+          class="text-white mr-3"
+        >
+          管理員後台
+        </router-link>
 
         <!-- is user is login -->
         <template v-if="isAuthenticated">
-          <router-link to="#" class="text-white mr-3"> {{currentUser.name || '使用者'}} 您好 </router-link>
+          <router-link to="#" class="text-white mr-3">
+            {{ currentUser.name || "使用者" }} 您好
+          </router-link>
           <button
             type="button"
             class="btn btn-sm btn-outline-success my-2 my-sm-0"
+            @click="logout"
           >
             登出
           </button>
@@ -35,44 +44,33 @@
 </template>
 
 <script>
-// ./src/components/Navbar.vue
-// seed data
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: '管理者',
-    email: 'root@example.com',
-    image: 'https://i.pravatar.cc/300',
-    isAdmin: true
-  },
-  isAuthenticated: true
-}
-
+import { mapState } from "vuex";
 
 export default {
-  data() {
-    return {
-      currentUser: {
-        id: -1,
-        name: '',
-        email: '',
-        image: 'https://i.pravatar.cc/300',
-        isAdmin: false
-      },
-      isAuthenticated: false
-    }
+  computed: {
+    ...mapState(["currentUser", "isAuthenticated"]),
   },
   methods: {
-    fetchUser() {
-      this.currentUser = {
-        ...this.currentUser,
-        ...dummyUser.currentUser
-      }
-      this.isAuthenticated = dummyUser.isAuthenticated
-    }
+    logout() {
+      this.$store.commit("revokeAuthentication");
+      this.$router.push("signin");
+    },
   },
-  created() {
-    this.fetchUser()
-  }
-}
+};
 </script>
+<style scoped>
+.navbar-toggler {
+  min-width: 70px;
+  margin-right: 0;
+}
+
+nav.bg-dark {
+  padding: 14px 16px;
+  background-color: #bd2333 !important;
+}
+
+.navbar-brand {
+  font-size: 19px;
+  padding: 0;
+}
+</style>

@@ -1,11 +1,11 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <strong>{{ profile.Comments.length }}</strong> 已評論餐廳
+      <strong>{{ profile.commentsLength }}</strong> 已評論餐廳
     </div>
     <div class="card-body">
       <router-link
-        v-for="comment in profile.Comments"
+        v-for="comment in comments"
         :key="comment.id"
         :to="{ name: 'restaurant', params: { id: comment.Restaurant.id } }"
       >
@@ -27,10 +27,29 @@ export default {
       type: Object,
       required: true,
     },
+    initialComment: {
+      type: Array,
+      required: true,
+    },
+  },
+  watch: {
+    initialProfile(newValue) {
+      this.profile = {
+        ...this.profile,
+        ...newValue,
+      };
+    },
+    initialComment(newValue) {
+      this.comments = {
+        ...this.comments,
+        ...newValue,
+      };
+    },
   },
   data() {
     return {
       profile: this.initialProfile,
+      comments: this.initialComment,
     };
   },
 };

@@ -19,7 +19,9 @@
           <td>{{ user.isAdmin ? "admin" : "user" }}</td>
           <td>
             <button
-              @click="handleToggleRole(user.id)"
+              @click="
+                handleToggleRole({ userId: user.id, isAdmin: user.isAdmin })
+              "
               v-if="user.isAdmin"
               type="button"
               class="btn btn-link"
@@ -27,7 +29,9 @@
               set as user
             </button>
             <button
-              @click="handleToggleRole(user.id)"
+              @click="
+                handleToggleRole({ userId: user.id, isAdmin: user.isAdmin })
+              "
               v-else
               type="button"
               class="btn btn-link"
@@ -43,41 +47,8 @@
 
 <script>
 import AdminNav from "../components/AdminNav.vue";
-
-const dummyUser = {
-  users: [
-    {
-      id: 1,
-      name: "root",
-      email: "root@example.com",
-      password: "$2a$10$7xSADMhfq3VP/RgKXShwkeM5zaef76EinnRFo.lZoWQ8lUnHTMYeK",
-      isAdmin: true,
-      image: null,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-    {
-      id: 2,
-      name: "user1",
-      email: "user1@example.com",
-      password: "$2a$10$7GQSR7U1uPaRBctJauU.9uP62rIu.EHxi03fOanGQblX9ZRqsNUdq",
-      isAdmin: false,
-      image: null,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-    {
-      id: 3,
-      name: "user2",
-      email: "user2@example.com",
-      password: "$2a$10$zOaf3qinIJftV7OTGmhQrOzGNIsDnnUpNruyRoMmms9raxUKCrJS6",
-      isAdmin: false,
-      image: null,
-      createdAt: "2022-04-20T15:00:31.000Z",
-      updatedAt: "2022-04-20T15:00:31.000Z",
-    },
-  ],
-};
+import adminAPI from "../apis/admin";
+import { Toast } from "../utils/helpers";
 
 export default {
   name: "AdminUsers",
@@ -93,21 +64,59 @@ export default {
     this.fetchUsers();
   },
   methods: {
-    fetchUsers() {
-      const { users } = dummyUser;
-      this.users = users;
+    async fetchUsers() {
+      try {
+        const { data, statusText } = await adminAPI.users.get();
+        if (statusText !== "OK") {
+          throw new Error(statusText);
+        }
+        this.users = data.users;
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法取得使用者資料，請稍後再試",
+        });
+      }
     },
-    handleToggleRole(userId) {
-      this.users = this.users.map((user) => {
-        if (user.id === userId) {
+    async handleToggleRole({ userId, isAdmin }) {
+      try {
+        const willBeAdmin = !isAdmin;
+        const { data, statusText } = await adminAPI.users.update({
+          userId,
+          isAdmin: willBeAdmin.toString(),
+        });
+        if (statusText !== "OK" || data.status !== "success") {
+          throw new Error(statusText);
+        }
+        this.users = this.users.map((user) => {
+          if (user.id !== userId) {
+            return user;
+          }
           return {
             ...user,
-            isAdmin: !user.isAdmin,
+            isAdmin: willBeAdmin,
           };
-        }
-        return user;
-      });
+        });
+        console.log(data);
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法更新使用者資料，請稍後再試",
+        });
+      }
     },
+
+    // handleToggleRole(userId) {
+    //   this.users = this.users.map((user) => {
+    //     if (user.id === userId) {
+    //       return {
+    //         ...user,
+    //         isAdmin: !user.isAdmin,
+    //       };
+    //     }
+    //     return user;
+    //   });
+    // },
   },
 };
 </script>

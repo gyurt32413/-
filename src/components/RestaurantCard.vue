@@ -18,7 +18,7 @@
           </router-link>
         </p>
         <span class="badge badge-secondary">{{
-          restaurant.Category.name
+          restaurant.Category.name ? restaurant.Category.name : "未分類"
         }}</span>
         <p class="card-text text-truncate">
           {{ restaurant.description }}
@@ -167,3 +167,34 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.badge.badge-secondary {
+  padding: 0;
+  margin: 8px 0;
+  color: #bd2333;
+  background-color: transparent;
+}
+
+.btn,
+.btn-border.btn:hover {
+  margin: 7px 14px 7px 0;
+}
+
+.card {
+  margin-bottom: 2rem !important;
+}
+.card-img-top {
+  background-color: #efefef;
+}
+
+.card-body {
+  padding: 17.5px;
+}
+
+.card-footer {
+  padding: 9px 17.5px;
+  border-color: rgb(232, 232, 232);
+  background: white;
+}
+</style>
